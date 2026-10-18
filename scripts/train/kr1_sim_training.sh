@@ -33,11 +33,11 @@ NUM_GPUS=${NUM_GPUS:-8}
 WAN_CKPT_DIR=${WAN_CKPT_DIR:-"./checkpoints/Wan2.1-I2V-14B-480P"}
 TOKENIZER_DIR=${TOKENIZER_DIR:-"./checkpoints/umt5-xxl"}
 
-# The KR1 sim rig has 1 view (left wrist). frame_seqlen scales with the
-# view count: upstream's 3-view recipes use 880 = 220 x (views + 1), so 1 view
-# takes 440. Validate on the max_steps=10 smoke run before a long job.
+# frame_seqlen is TOKENS PER COMPOSITED LATENT FRAME: (H/16)x(W/16) per 320x176
+# tile = 220; multi-view recipes tile a 2x2 grid (880). One untiled view
+# = 220 (the local collate shows (9, 176, 320, 3) image stacks).
 NUM_VIEWS=${NUM_VIEWS:-1}
-FRAME_SEQLEN=${FRAME_SEQLEN:-440}
+FRAME_SEQLEN=${FRAME_SEQLEN:-220}
 # =============================================
 
 # ============ AUTO-DOWNLOAD WEIGHTS ============
