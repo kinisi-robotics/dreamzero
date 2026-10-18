@@ -65,7 +65,7 @@ torchrun --nproc_per_node $NUM_GPUS --standalone groot/vla/experiment/experiment
     data=dreamzero/kr1 \
     wandb_project=dreamzero \
     train_architecture=lora \
-    num_frames=25 \
+    num_frames=9 \
     action_horizon=24 \
     num_views=$NUM_VIEWS \
     model=dreamzero/vla \
