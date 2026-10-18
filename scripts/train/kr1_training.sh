@@ -65,7 +65,7 @@ torchrun --nproc_per_node $NUM_GPUS --standalone groot/vla/experiment/experiment
     data=dreamzero/kr1 \
     wandb_project=dreamzero \
     train_architecture=lora \
-    num_frames=33 \
+    num_frames=25 \
     action_horizon=24 \
     num_views=$NUM_VIEWS \
     model=dreamzero/vla \
@@ -93,7 +93,7 @@ torchrun --nproc_per_node $NUM_GPUS --standalone groot/vla/experiment/experiment
     image_resolution_width=320 \
     image_resolution_height=176 \
     save_lora_only=true \
-    max_chunk_size=4 \
+    max_chunk_size=1 \
     frame_seqlen=$FRAME_SEQLEN \
     save_strategy=steps \
     kr1_data_root=$KR1_DATA_ROOT \
