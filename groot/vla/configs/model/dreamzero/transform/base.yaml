@@ -40,3 +40,7 @@ embodiment_tag_to_projector_index:
   sim_behavior_r1_pro: 31
   mecka_hands: 27
   real_r1_pro_sharpa: 28
+  # Kinisi KR1 rigs alias the agibot slot: bimanual like the KR1, and the
+  # best-trained slot of the DreamZero-AgiBot fine-tune base.
+  kr1: 26
+  kr1_sim: 26
