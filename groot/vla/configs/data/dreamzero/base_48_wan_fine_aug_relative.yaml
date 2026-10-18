@@ -343,6 +343,171 @@ transform_yam:
 
 
 ################################################################################
+# kr1 (Kinisi KR1 real rig: 20-D bi-arm EE state/action from mimic_dex's
+#      bi9dof_grip_rel columns, exported by export_dreamzero.py; sub-keys
+#      left_eef [0,9] right_eef [9,18] left_gripper [18,19] right_gripper
+#      [19,20]; head + right wrist cameras, 30 Hz)
+################################################################################
+
+modality_config_kr1:
+  video:
+    _target_: groot.vla.data.dataset.ModalityConfig
+    delta_indices: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
+    eval_delta_indices: [0]
+    modality_keys:
+      - video.head_camera
+      - video.right_wrist_camera
+  state:
+    _target_: groot.vla.data.dataset.ModalityConfig
+    delta_indices: [0]
+    modality_keys:
+      - state.left_eef
+      - state.right_eef
+      - state.left_gripper
+      - state.right_gripper
+  action:
+    _target_: groot.vla.data.dataset.ModalityConfig
+    delta_indices: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
+    modality_keys:
+      - action.left_eef
+      - action.right_eef
+      - action.left_gripper
+      - action.right_gripper
+  language:
+    _target_: groot.vla.data.dataset.ModalityConfig
+    delta_indices: [0]
+    modality_keys:
+      - annotation.task
+
+transform_kr1:
+  _target_: groot.vla.data.transform.ComposedModalityTransform
+  transforms:
+    # Video transforms
+    - <<: *totensor_cfg
+      apply_to: ${modality_config_kr1.video.modality_keys}
+    - <<: *crop_cfg
+      apply_to: ${modality_config_kr1.video.modality_keys}
+    - <<: *resize_cfg
+      apply_to: ${modality_config_kr1.video.modality_keys}
+    - <<: *color_jitter_cfg
+      apply_to: ${modality_config_kr1.video.modality_keys}
+    - <<: *to_numpy_cfg
+      apply_to: ${modality_config_kr1.video.modality_keys}
+
+    # State transforms
+    - _target_: groot.vla.data.transform.StateActionToTensor
+      apply_to: ${modality_config_kr1.state.modality_keys}
+    - _target_: groot.vla.data.transform.StateActionTransform
+      apply_to: ${modality_config_kr1.state.modality_keys}
+      normalization_modes:
+        state.left_eef: q99
+        state.right_eef: q99
+        state.left_gripper: q99
+        state.right_gripper: q99
+
+    # Action transforms
+    - _target_: groot.vla.data.transform.StateActionToTensor
+      apply_to: ${modality_config_kr1.action.modality_keys}
+    - _target_: groot.vla.data.transform.StateActionTransform
+      apply_to: ${modality_config_kr1.action.modality_keys}
+      normalization_modes:
+        action.left_eef: q99
+        action.right_eef: q99
+        action.left_gripper: q99
+        action.right_gripper: q99
+
+    # ConcatTransform
+    - _target_: groot.vla.data.transform.ConcatTransform
+      video_concat_order: ${modality_config_kr1.video.modality_keys}
+      state_concat_order: ${modality_config_kr1.state.modality_keys}
+      action_concat_order: ${modality_config_kr1.action.modality_keys}
+
+    # Model-specific transform
+    - ${model_specific_transform}
+
+
+################################################################################
+# kr1_sim (Kinisi KR1 sim cube-pick rig: same 20-D layout, left wrist camera
+#          only, 10 Hz)
+################################################################################
+
+modality_config_kr1_sim:
+  video:
+    _target_: groot.vla.data.dataset.ModalityConfig
+    delta_indices: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
+    eval_delta_indices: [0]
+    modality_keys:
+      - video.left_wrist_camera
+  state:
+    _target_: groot.vla.data.dataset.ModalityConfig
+    delta_indices: [0]
+    modality_keys:
+      - state.left_eef
+      - state.right_eef
+      - state.left_gripper
+      - state.right_gripper
+  action:
+    _target_: groot.vla.data.dataset.ModalityConfig
+    delta_indices: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
+    modality_keys:
+      - action.left_eef
+      - action.right_eef
+      - action.left_gripper
+      - action.right_gripper
+  language:
+    _target_: groot.vla.data.dataset.ModalityConfig
+    delta_indices: [0]
+    modality_keys:
+      - annotation.task
+
+transform_kr1_sim:
+  _target_: groot.vla.data.transform.ComposedModalityTransform
+  transforms:
+    # Video transforms
+    - <<: *totensor_cfg
+      apply_to: ${modality_config_kr1_sim.video.modality_keys}
+    - <<: *crop_cfg
+      apply_to: ${modality_config_kr1_sim.video.modality_keys}
+    - <<: *resize_cfg
+      apply_to: ${modality_config_kr1_sim.video.modality_keys}
+    - <<: *color_jitter_cfg
+      apply_to: ${modality_config_kr1_sim.video.modality_keys}
+    - <<: *to_numpy_cfg
+      apply_to: ${modality_config_kr1_sim.video.modality_keys}
+
+    # State transforms
+    - _target_: groot.vla.data.transform.StateActionToTensor
+      apply_to: ${modality_config_kr1_sim.state.modality_keys}
+    - _target_: groot.vla.data.transform.StateActionTransform
+      apply_to: ${modality_config_kr1_sim.state.modality_keys}
+      normalization_modes:
+        state.left_eef: q99
+        state.right_eef: q99
+        state.left_gripper: q99
+        state.right_gripper: q99
+
+    # Action transforms
+    - _target_: groot.vla.data.transform.StateActionToTensor
+      apply_to: ${modality_config_kr1_sim.action.modality_keys}
+    - _target_: groot.vla.data.transform.StateActionTransform
+      apply_to: ${modality_config_kr1_sim.action.modality_keys}
+      normalization_modes:
+        action.left_eef: q99
+        action.right_eef: q99
+        action.left_gripper: q99
+        action.right_gripper: q99
+
+    # ConcatTransform
+    - _target_: groot.vla.data.transform.ConcatTransform
+      video_concat_order: ${modality_config_kr1_sim.video.modality_keys}
+      state_concat_order: ${modality_config_kr1_sim.state.modality_keys}
+      action_concat_order: ${modality_config_kr1_sim.action.modality_keys}
+
+    # Model-specific transform
+    - ${model_specific_transform}
+
+
+################################################################################
 # Modality Configs
 ################################################################################
 
@@ -350,6 +515,8 @@ modality_configs:
   oxe_droid: ${modality_config_oxe_droid}
   agibot: ${modality_config_agibot}
   yam: ${modality_config_yam}
+  kr1: ${modality_config_kr1}
+  kr1_sim: ${modality_config_kr1_sim}
 
 ################################################################################
 # Transforms
@@ -359,6 +526,8 @@ transforms:
   oxe_droid: ${transform_oxe_droid}
   agibot: ${transform_agibot}
   yam: ${transform_yam}
+  kr1: ${transform_kr1}
+  kr1_sim: ${transform_kr1_sim}
 
 ################################################################################
 # Metadata Versions
@@ -368,6 +537,8 @@ metadata_versions:
   oxe_droid: '0221'
   agibot: '0221'
   yam: '0221'
+  kr1: '0221'
+  kr1_sim: '0221'
 
 ################################################################################
 # FPS (per embodiment, null means use dataset default)
@@ -375,3 +546,5 @@ metadata_versions:
 
 fps:
   yam: 30
+  kr1: 30
+  kr1_sim: 10

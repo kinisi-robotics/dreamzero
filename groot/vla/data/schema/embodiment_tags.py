@@ -155,6 +155,18 @@ class EmbodimentTag(Enum):
 
     YAM = "yam"
 
+    KR1 = "kr1"
+    """
+    Kinisi KR1 bimanual robot, real rig (head + right wrist cameras, 30 Hz,
+    20-D bi-arm EE state/action: per-arm xyz + rot6d + gripper).
+    """
+
+    KR1_SIM = "kr1_sim"
+    """
+    Kinisi KR1 simulated single-left-arm rig (left wrist camera, 10 Hz, same
+    20-D bi-arm layout with the right arm masked to the neutral pose).
+    """
+
     DREAM = "dream"
     """
     The datasets with DREAM actions.
