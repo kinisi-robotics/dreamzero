@@ -789,6 +789,15 @@ class WANPolicyHead(ActionHead):
             weighted_dynamics_loss = weight_dynamics.mean()
             
             if actions.numel() > 0:
+                if not getattr(self, "_kinisi_shapes_logged", False):
+                    self._kinisi_shapes_logged = True
+                    print(
+                        f"[kinisi-debug] head: pred={tuple(action_noise_pred.shape)} "
+                        f"target={tuple(training_target_action.shape)} "
+                        f"mask={tuple(action_mask.shape)} actions={tuple(actions.shape)} "
+                        f"latents={tuple(latents.shape)} seq_len={seq_len}",
+                        flush=True,
+                    )
                 action_loss_per_sample = torch.nn.functional.mse_loss(
                     action_noise_pred.float(), training_target_action.float(), reduction='none'
                 ) * action_mask  # shape: [B, ...]

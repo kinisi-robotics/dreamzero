@@ -2146,6 +2146,14 @@ class CausalWanModel(ModelMixin, ConfigMixin):
             x = x[:, clean_x.shape[1]:]
 
         if action is not None:
+            if not getattr(self, "_kinisi_shapes_logged", False):
+                self._kinisi_shapes_logged = True
+                print(
+                    f"[kinisi-debug] dit: x={tuple(x.shape)} seq_len={seq_len} "
+                    f"action_length={action_length} "
+                    f"clean_x={tuple(clean_x.shape) if clean_x is not None else None}",
+                    flush=True,
+                )
             action_noise_pred = x[:, seq_len: seq_len + action_length]
             action_noise_pred = self.action_decoder(action_noise_pred, embodiment_id)
         else:
