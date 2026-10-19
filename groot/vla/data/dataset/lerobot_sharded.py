@@ -1145,10 +1145,17 @@ class ShardedLeRobotSubLangSingleActionChunkDatasetDROID(LeRobotSingleDataset):
             np.ndarray: New indices sampled uniformly from the language-consistent range of the first index.
         """
         if len(step_indices) == 0:
-            return np.array([])
-        
+            return np.array([], dtype=int)
+
         # Use only the first index to determine the target language
         first_idx = max(0, min(step_indices[0], trajectory_length - 1))
+        # kinisi: clamp the anchor so one full set (24 frames + the 4n+1 tail
+        # frame) always fits. Anchors in the last 24 frames otherwise collect
+        # <= 8 frames and fall into the empty-return path below, whose float64
+        # empty array crashes get_video's shard indexing; short episodes hit
+        # this constantly.
+        if trajectory_length >= 25:
+            first_idx = min(first_idx, trajectory_length - 25)
         target_language = language_annotations[first_idx]
         
         # Build sampled indices by moving in ±32-frame steps from first_idx
@@ -1204,7 +1211,7 @@ class ShardedLeRobotSubLangSingleActionChunkDatasetDROID(LeRobotSingleDataset):
         
         # De-duplicate and sort ascending for stable ordering
         if len(sampled_list) == 0:
-            return np.array([])
+            return np.array([], dtype=int)
         unique_sorted = np.array(sorted(set(sampled_list)), dtype=int)
         # Ensure we return at most 81 frames
         if unique_sorted.size > max_frames:
@@ -1223,7 +1230,7 @@ class ShardedLeRobotSubLangSingleActionChunkDatasetDROID(LeRobotSingleDataset):
                 # Trim to 8n+1 format. Require at least 9 frames so (noisy_frames-1)//num_frame_per_block >= 1
                 # for action/state model invariant (CausalWanModel); otherwise return empty so sample is skipped.
                 if unique_sorted.size <= 8:
-                    return np.array([])
+                    return np.array([], dtype=int)
                 unique_sorted = unique_sorted[:-7]
         
         # ensure that unique_sorted has 4n+1 frames
