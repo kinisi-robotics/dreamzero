@@ -60,6 +60,12 @@ if [ ! -d "$KR1_DATA_ROOT" ] || [ ! -f "$KR1_DATA_ROOT/meta/embodiment.json" ]; 
     exit 1
 fi
 
+# The 2x2-grid samples (880 tokens per latent frame) OOM an 80 GB H100 at the
+# upstream batch of 4; halve it and keep the effective batch via accumulation.
+export PYTORCH_CUDA_ALLOC_CONF=${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}
+BATCH_SIZE=${BATCH_SIZE:-2}
+GRAD_ACCUM=${GRAD_ACCUM:-2}
+
 torchrun --nproc_per_node $NUM_GPUS --standalone groot/vla/experiment/experiment.py \
     report_to=wandb \
     data=dreamzero/kr1 \
@@ -80,7 +86,8 @@ torchrun --nproc_per_node $NUM_GPUS --standalone groot/vla/experiment/experiment
     save_steps=10000 \
     training_args.warmup_ratio=0.05 \
     output_dir=$OUTPUT_DIR \
-    per_device_train_batch_size=4 \
+    per_device_train_batch_size=$BATCH_SIZE \
+    ++training_args.gradient_accumulation_steps=$GRAD_ACCUM \
     max_steps=100000 \
     weight_decay=1e-5 \
     save_total_limit=10 \
